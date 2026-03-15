@@ -16,7 +16,7 @@ public class MainFrame extends JFrame {
     private JButton btnCalculate, btnClear;
 
     // Панели для графиков (пока пустые)
-    private JPanel panelChart1, panelChart2, panelChart3, panelChart4;
+    private JPanel panelChart1, panelChart2, panelChart3, panelChart4, panelChart5;
 
     // Текстовые области для вывода информации (опционально)
     private JTextArea textAreaInfo;
@@ -198,22 +198,24 @@ public class MainFrame extends JFrame {
         gridPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Создаем 4 пустые панели для графиков с заголовками
-        panelChart1 = createEmptyChartPanel("Эволюция координат X, Y, Z от времени");
-        panelChart2 = createEmptyChartPanel("Эволюция скоростей Vx, Vy, Vz от времени");
-        panelChart3 = createEmptyChartPanel("Траектория движения в плоскости XY");
-        panelChart4 = createEmptyChartPanel("Траектория движения в плоскости XZ");
+        panelChart1 = createEmptyChartPanel("Эволюция координат X, Y, Z от времени", "X", "Y");
+        panelChart2 = createEmptyChartPanel("Эволюция скоростей Vx, Vy, Vz от времени", "X", "Y");
+        panelChart3 = createEmptyChartPanel("Траектория движения в плоскости XY", "X", "Y");
+        panelChart4 = createEmptyChartPanel("Траектория движения в плоскости XZ", "X", "Z");
+        panelChart5 = createEmptyChartPanel("Траектория движения в плоскости YZ", "Y", "Z");
 
         // Добавляем панели в сетку
         gridPanel.add(panelChart1);
         gridPanel.add(panelChart2);
         gridPanel.add(panelChart3);
         gridPanel.add(panelChart4);
+        gridPanel.add(panelChart5);
 
         chartsContainer.add(gridPanel, BorderLayout.CENTER);
 
         // Добавляем небольшую информационную панель справа (опционально)
         JPanel infoPanel = new JPanel(new BorderLayout());
-        infoPanel.setPreferredSize(new Dimension(200, 0));
+        infoPanel.setPreferredSize(new Dimension(300, 0));
         infoPanel.setBorder(BorderFactory.createTitledBorder("Информация"));
 
         textAreaInfo = new JTextArea(10, 20);
@@ -236,7 +238,7 @@ public class MainFrame extends JFrame {
     }
 
     //Создание пустой панели для графика с заголовком
-    private JPanel createEmptyChartPanel(String title) {
+    private JPanel createEmptyChartPanel(String title, String axisHorizontal, String axisVertical) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(Color.GRAY),
@@ -274,8 +276,8 @@ public class MainFrame extends JFrame {
                 // Подписи осей
                 g2.setColor(Color.BLACK);
                 g2.setFont(new Font("Arial", Font.PLAIN, 10));
-                g2.drawString("X", width - 15, height / 2 - 5);
-                g2.drawString("Y", width / 2 + 5, 25);
+                g2.drawString(axisHorizontal, width - 15, height / 2 - 5);
+                g2.drawString(axisVertical, width / 2 + 5, 25);
             }
         };
         axesPanel.setOpaque(false);
@@ -367,6 +369,7 @@ public class MainFrame extends JFrame {
             updatePlaceholderText(panelChart2, "График скоростей (данные получены)");
             updatePlaceholderText(panelChart3, "Траектория XY (данные получены)");
             updatePlaceholderText(panelChart4, "Траектория XZ (данные получены)");
+            updatePlaceholderText(panelChart5, "Траектория YZ (данные получены)");
         }
 
         private void updatePlaceholderText(JPanel panel, String newText) {
