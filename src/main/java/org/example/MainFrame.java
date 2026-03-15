@@ -34,7 +34,6 @@ public class MainFrame extends JFrame {
         // Создаем все компоненты интерфейса
         createInputPanel();
         createChartsPanel();
-        createStatusBar();
 
         // Устанавливаем минимальный размер окна
         setMinimumSize(new Dimension(1000, 700));
@@ -285,24 +284,6 @@ public class MainFrame extends JFrame {
         return panel;
     }
 
-    //Создание строки состояния (южная часть окна)
-    private void createStatusBar() {
-        JPanel statusBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        statusBar.setBorder(BorderFactory.createEtchedBorder());
-
-        JLabel statusLabel = new JLabel("Готов к работе. Введите параметры и нажмите 'Выполнить расчет'");
-        statusLabel.setFont(new Font("Arial", Font.PLAIN, 11));
-
-        JLabel versionLabel = new JLabel("Версия 1.0");
-        versionLabel.setFont(new Font("Arial", Font.PLAIN, 11));
-        versionLabel.setForeground(Color.GRAY);
-
-        statusBar.add(statusLabel);
-        statusBar.add(Box.createHorizontalGlue());
-        statusBar.add(versionLabel);
-
-        add(statusBar, BorderLayout.SOUTH);
-    }
 
     //Сброс полей ввода к значениям по умолчанию
     private void resetInputFields() {
@@ -379,9 +360,7 @@ public class MainFrame extends JFrame {
             }
         }
 
-        /**
-         * Обновляет текст на панелях-заглушках графиков
-         */
+        //Обновляет текст на панелях-заглушках графиков
         private void updateChartPlaceholders() {
             // Получаем все компоненты на панелях графиков и обновляем текст
             updatePlaceholderText(panelChart1, "График координат (данные получены)");
