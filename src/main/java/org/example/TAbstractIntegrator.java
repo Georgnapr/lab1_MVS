@@ -1,22 +1,29 @@
 package org.example;
 
-import java.util.Vector;
-
 public abstract class TAbstractIntegrator {
-    public Float t0;
-    public Float tk;
-    public Float h;
-    private TDynamicModel RightParts;
+    public double t0;
+    public double tk;
+    protected double t;
+    public double h;
+    protected TDynamicModel rightParts;
+    protected TVector state;
 
-    public void SetRightParts(TDynamicModel model){
 
+    public void setInitialState(TVector state){
+        this.state = state;
+        this.t = this.t0;
     }
 
-    public void MoveTo(Float t0) {
+    public void SetRightParts(TDynamicModel DynamicModel){
+        this.rightParts = DynamicModel;
     }
 
-    public Vector OneStep(){
-        Vector v = new Vector<>();
-        return v;
+    public void MoveTo(){
+        while(t < this.tk){
+            state = OneStep();
+            t += h;
+        }
     }
+
+    public abstract TVector OneStep();
 }
