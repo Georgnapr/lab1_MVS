@@ -15,17 +15,18 @@ public class MainFrame extends JFrame {
     private JComboBox<String> cbIntegrator;
     private JButton btnCalculate, btnClear;
 
-    // Панели для графиков (пока пустые)
+    // Панели для графиков
     private JPanel panelChart1, panelChart2, panelChart3, panelChart4, panelChart5;
 
-    // Текстовые области для вывода информации (опционально)
+    // Текстовые области для вывода информации
     private JTextArea textAreaInfo;
 
     public MainFrame() {
+
         // Настройка главного окна
         setTitle("Моделирование движения космического аппарата");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1400, 900);
+        setSize(1280, 900);
         setLocationRelativeTo(null); // Центрируем окно на экране
 
         // Устанавливаем менеджер компоновки
@@ -36,19 +37,17 @@ public class MainFrame extends JFrame {
         createChartsPanel();
 
         // Устанавливаем минимальный размер окна
-        setMinimumSize(new Dimension(1000, 700));
+        setMinimumSize(new Dimension(900, 600));
     }
 
     //Создание панели ввода данных (северная часть окна)
     private void createInputPanel() {
+
         // Основная панель с рамкой и заголовком
         JPanel inputPanel = new JPanel();
         inputPanel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createEtchedBorder(),
-                "Параметры моделирования",
-                TitledBorder.LEFT,
-                TitledBorder.TOP,
-                new Font("Arial", Font.BOLD, 14)
+                "Параметры моделирования"
         ));
 
         // Используем GridBagLayout для гибкого размещения
@@ -86,14 +85,10 @@ public class MainFrame extends JFrame {
                 "Метод Эйлера",
                 "Метод Рунге-Кутты 4-го порядка"
         });
-        cbIntegrator.setToolTipText("Выберите метод численного интегрирования");
 
         // Создаем кнопки
         btnCalculate = new JButton("Выполнить расчет");
-        btnCalculate.setToolTipText("Начать моделирование с указанными параметрами");
-
         btnClear = new JButton("Очистить поля");
-        btnClear.setToolTipText("Сбросить все поля ввода к значениям по умолчанию");
 
         // Добавляем обработчики для кнопок
         btnCalculate.addActionListener(new CalculateListener());
@@ -177,69 +172,84 @@ public class MainFrame extends JFrame {
         gbc.gridx = 1;
         inputPanel.add(btnClear, gbc);
 
-        // Добавляем панель ввода в верхнюю часть главного окна
-        add(inputPanel, BorderLayout.NORTH);
+        // --- информационная панель (справа от полей ввода) ---
+        JPanel infoPanel = new JPanel(new BorderLayout());
+        infoPanel.setPreferredSize(new Dimension(315, 315));
+        infoPanel.setBorder(BorderFactory.createTitledBorder("Информация"));
+
+        textAreaInfo = new JTextArea();
+        textAreaInfo.setEditable(false);
+        textAreaInfo.setFont(new Font("Monospaced", Font.PLAIN, 12));
+
+        JScrollPane infoScroll = new JScrollPane(textAreaInfo);
+        infoPanel.add(infoScroll, BorderLayout.CENTER);
+
+        // Контейнер верхней области: слева поля и кнопки, справа информация
+        JPanel topContainer = new JPanel(new BorderLayout());
+        topContainer.add(inputPanel, BorderLayout.CENTER);
+        topContainer.add(infoPanel, BorderLayout.EAST);
+
+        // Добавляем верхний контейнер в верхнюю часть главного окна
+        add(topContainer, BorderLayout.NORTH);
     }
 
     //Создание панели с графиками (центральная часть окна)
     private void createChartsPanel() {
-        // Основная панель для графиков с рамкой
+
         JPanel chartsContainer = new JPanel(new BorderLayout());
         chartsContainer.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createEtchedBorder(),
-                "Результаты моделирования",
-                TitledBorder.LEFT,
-                TitledBorder.TOP,
-                new Font("Arial", Font.BOLD, 14)
+                "Результаты моделирования"
         ));
 
-        // Панель для 4 графиков в сетке 2x2
-        JPanel gridPanel = new JPanel(new GridLayout(2, 2, 10, 10));
-        gridPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        // Главная панель со строками графиков
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-        // Создаем 4 пустые панели для графиков с заголовками
-        panelChart1 = createEmptyChartPanel("Эволюция координат X, Y, Z от времени", "X", "Y");
-        panelChart2 = createEmptyChartPanel("Эволюция скоростей Vx, Vy, Vz от времени", "X", "Y");
-        panelChart3 = createEmptyChartPanel("Траектория движения в плоскости XY", "X", "Y");
-        panelChart4 = createEmptyChartPanel("Траектория движения в плоскости XZ", "X", "Z");
-        panelChart5 = createEmptyChartPanel("Траектория движения в плоскости YZ", "Y", "Z");
 
-        // Добавляем панели в сетку
-        gridPanel.add(panelChart1);
-        gridPanel.add(panelChart2);
-        gridPanel.add(panelChart3);
-        gridPanel.add(panelChart4);
-        gridPanel.add(panelChart5);
+        // --- графики ---
+        panelChart1 = createEmptyChartPanel("Эволюция координат X,Y,Z");
+        panelChart2 = createEmptyChartPanel("Эволюция скоростей Vx,Vy,Vz");
+        panelChart3 = createEmptyChartPanel("Траектория XY");
+        panelChart4 = createEmptyChartPanel("Траектория XZ");
+        panelChart5 = createEmptyChartPanel("Траектория YZ");
 
-        chartsContainer.add(gridPanel, BorderLayout.CENTER);
+        // строка 1
+        mainPanel.add(createRow(panelChart1, panelChart2));
 
-        // Добавляем небольшую информационную панель справа (опционально)
-        JPanel infoPanel = new JPanel(new BorderLayout());
-        infoPanel.setPreferredSize(new Dimension(300, 0));
-        infoPanel.setBorder(BorderFactory.createTitledBorder("Информация"));
+        // строка 2
+        mainPanel.add(createRow(panelChart3, panelChart4));
 
-        textAreaInfo = new JTextArea(10, 20);
-        textAreaInfo.setEditable(false);
-        textAreaInfo.setFont(new Font("Monospaced", Font.PLAIN, 12));
-        textAreaInfo.setText("Информация о расчете:\n" +
-                "--------------------\n" +
-                "Метод: не выбран\n" +
-                "Статус: ожидание\n" +
-                "Шагов: 0\n" +
-                "Время: 0 с");
+        // строка 3
+        mainPanel.add(createRow(panelChart5, new JPanel()));
 
-        JScrollPane scrollPane = new JScrollPane(textAreaInfo);
-        infoPanel.add(scrollPane, BorderLayout.CENTER);
+        // Scroll
+        JScrollPane scrollPane = new JScrollPane(mainPanel);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-        // Добавляем информационную панель справа (можно закомментировать, если не нужна)
-        chartsContainer.add(infoPanel, BorderLayout.EAST);
+        chartsContainer.add(scrollPane, BorderLayout.CENTER);
 
         add(chartsContainer, BorderLayout.CENTER);
     }
 
+    private JPanel createRow(JPanel left, JPanel right) {
+
+        JPanel row = new JPanel(new GridLayout(1,2,10,10));
+        row.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
+        left.setPreferredSize(new Dimension(500,500));
+        right.setPreferredSize(new Dimension(500,500));
+
+        row.add(left);
+        row.add(right);
+
+        return row;
+    }
+
     //Создание пустой панели для графика с заголовком
-    private JPanel createEmptyChartPanel(String title, String axisHorizontal, String axisVertical) {
+    private JPanel createEmptyChartPanel(String title) {
         JPanel panel = new JPanel(new BorderLayout());
+
         panel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(Color.GRAY),
                 title,
@@ -248,40 +258,6 @@ public class MainFrame extends JFrame {
                 new Font("Arial", Font.PLAIN, 12)
         ));
         panel.setBackground(Color.WHITE);
-
-        // Добавляем временное содержимое, чтобы показать, что здесь будет график
-        JLabel placeholder = new JLabel("Здесь будет отображаться график", SwingConstants.CENTER);
-        placeholder.setForeground(Color.GRAY);
-        placeholder.setFont(new Font("Arial", Font.ITALIC, 14));
-        panel.add(placeholder, BorderLayout.CENTER);
-
-        // Добавляем изображение осей координат (простая отрисовка)
-        JPanel axesPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2 = (Graphics2D) g;
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                // Рисуем оси координат
-                int width = getWidth();
-                int height = getHeight();
-
-                g2.setColor(Color.LIGHT_GRAY);
-                // Горизонтальная линия (ось X)
-                g2.drawLine(20, height / 2, width - 20, height / 2);
-                // Вертикальная линия (ось Y)
-                g2.drawLine(width / 2, 20, width / 2, height - 20);
-
-                // Подписи осей
-                g2.setColor(Color.BLACK);
-                g2.setFont(new Font("Arial", Font.PLAIN, 10));
-                g2.drawString(axisHorizontal, width - 15, height / 2 - 5);
-                g2.drawString(axisVertical, width / 2 + 5, 25);
-            }
-        };
-        axesPanel.setOpaque(false);
-        panel.add(axesPanel, BorderLayout.CENTER);
 
         return panel;
     }
@@ -298,12 +274,11 @@ public class MainFrame extends JFrame {
         tfT0.setText("0.0");
         tfTk.setText("10000.0");
         tfH.setText("10.0");
-        cbIntegrator.setSelectedIndex(1); // Выбираем Рунге-Кутту по умолчанию
+        cbIntegrator.setSelectedIndex(0);
+
     }
 
-
     //Внутренний класс-слушатель для кнопки расчета
-    //Пока просто выводит сообщение и обновляет информацию
     private class CalculateListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -319,6 +294,74 @@ public class MainFrame extends JFrame {
                 double tk = Double.parseDouble(tfTk.getText());
                 double h = Double.parseDouble(tfH.getText());
 
+                //РЕАЛИЗАЦИЯ ИНТЕГРИРОВАНИЯ
+                TVector initialState = new TVector(x, y, z, vx, vy, vz);
+                TDynamicModel model = new TSpaceCraft();
+                TAbstractIntegrator integrator;
+
+                if (cbIntegrator.getSelectedIndex() == 0) {
+                    integrator = new TEuler();
+                } else {
+                    integrator = new TRungeKutta();
+                }
+
+                integrator.t0 = t0;
+                integrator.tk = tk;
+                integrator.h = h;
+                integrator.SetRightParts(model);
+                integrator.setInitialState(initialState);
+                integrator.MoveTo();
+
+                java.util.List<TVector> trajectory = integrator.trajectory;
+                java.util.List<Double> time = integrator.time;
+
+                panelChart1.removeAll();
+                panelChart1.add(ChartCreator.createPositionTimeChart(
+                        trajectory,
+                        time
+                ));
+
+                panelChart2.removeAll();
+                panelChart2.add(ChartCreator.createVelocityTimeChart(
+                        trajectory,
+                        time
+                ));
+
+                panelChart3.removeAll();
+                panelChart3.add(ChartCreator.createPhaseChart(
+                        "X",
+                        "Y",
+                        trajectory,
+                        v -> v.x,
+                        v -> v.y
+                ));
+
+                panelChart4.removeAll();
+                panelChart4.add(ChartCreator.createPhaseChart(
+                        "X",
+                        "Z",
+                        trajectory,
+                        v -> v.x,
+                        v -> v.z
+                ));
+
+                panelChart5.removeAll();
+                panelChart5.add(ChartCreator.createPhaseChart(
+                        "Y",
+                        "Z",
+                        trajectory,
+                        v -> v.y,
+                        v -> v.z
+                ));
+
+                panelChart1.revalidate();
+                panelChart2.revalidate();
+                panelChart3.revalidate();
+                panelChart4.revalidate();
+                panelChart5.revalidate();
+
+                TVector result = integrator.state;
+
                 // Получаем выбранный метод
                 String method = (String) cbIntegrator.getSelectedItem();
 
@@ -328,56 +371,30 @@ public class MainFrame extends JFrame {
                 // Обновляем информационное поле
                 String info = String.format(
                         "Информация о расчете:\n" +
-                                "--------------------\n" +
-                                "Метод: %s\n" +
-                                "Статус: выполнен (имитация)\n" +
-                                "Начальное положение: (%.1f, %.1f, %.1f) м\n" +
-                                "Начальная скорость: (%.1f, %.1f, %.1f) м/с\n" +
-                                "Шагов: %d\n" +
-                                "Время моделирования: %.1f с\n" +
-                                "Шаг: %.2f с\n\n" +
-                                "ВНИМАНИЕ: Графики временно не реализованы!",
-                        method, x, y, z, vx, vy, vz, steps, tk - t0, h
+                        "--------------------\n" +
+                        "Метод: %s\n" +
+                        "Статус: выполнен\n\n" +
+                        "Конечное положение:\n" +
+                        "(%.1f; %.1f; %.1f) м\n\n" +
+                        "Конечная скорость:\n" +
+                        "(%.1f; %.1f; %.1f) м/с\n\n" +
+                        "Шаги:\n" +
+                        "%s шагов",
+                        method,
+                        result.x, result.y, result.z,
+                        result.vx, result.vy, result.vz,
+                        steps
                 );
 
                 if (textAreaInfo != null) {
                     textAreaInfo.setText(info);
                 }
 
-                // Показываем сообщение пользователю
-                JOptionPane.showMessageDialog(MainFrame.this,
-                        "Расчет выполнен успешно (в демо-режиме).\n" +
-                                "Для реального расчета необходимо подключить JFreeChart.",
-                        "Информация",
-                        JOptionPane.INFORMATION_MESSAGE);
-
-                // Здесь можно изменить текст на панелях графиков
-                updateChartPlaceholders();
-
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(MainFrame.this,
                         "Ошибка ввода: все поля должны содержать числа.",
                         "Ошибка",
                         JOptionPane.ERROR_MESSAGE);
-            }
-        }
-
-        //Обновляет текст на панелях-заглушках графиков
-        private void updateChartPlaceholders() {
-            // Получаем все компоненты на панелях графиков и обновляем текст
-            updatePlaceholderText(panelChart1, "График координат (данные получены)");
-            updatePlaceholderText(panelChart2, "График скоростей (данные получены)");
-            updatePlaceholderText(panelChart3, "Траектория XY (данные получены)");
-            updatePlaceholderText(panelChart4, "Траектория XZ (данные получены)");
-            updatePlaceholderText(panelChart5, "Траектория YZ (данные получены)");
-        }
-
-        private void updatePlaceholderText(JPanel panel, String newText) {
-            // Ищем компонент JLabel внутри панели и обновляем его текст
-            for (Component comp : panel.getComponents()) {
-                if (comp instanceof JLabel) {
-                    ((JLabel) comp).setText(newText);
-                }
             }
         }
     }
