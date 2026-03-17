@@ -13,10 +13,9 @@ public class MainFrame extends JFrame {
     private JTextField tfVx, tfVy, tfVz;
     private JTextField tfT0, tfTk, tfH;
     private JComboBox<String> cbIntegrator;
-    private JButton btnCalculate, btnClear;
 
     // Панели для графиков
-    private JPanel panelChart1, panelChart2, panelChart3, panelChart4, panelChart5;
+    private final JPanel[] chartPanels = new JPanel[5];
 
     // Текстовые области для вывода информации
     private JTextArea textAreaInfo;
@@ -87,15 +86,14 @@ public class MainFrame extends JFrame {
         });
 
         // Создаем кнопки
-        btnCalculate = new JButton("Выполнить расчет");
-        btnClear = new JButton("Очистить поля");
+        JButton btnCalculate = new JButton("Выполнить расчет");
+        JButton btnClear = new JButton("Очистить поля");
 
         // Добавляем обработчики для кнопок
         btnCalculate.addActionListener(new CalculateListener());
         btnClear.addActionListener(e -> resetInputFields());
 
         // Размещаем компоненты на панели
-
         // Строка 0: Заголовки для координат
         gbc.gridy = 0;
         gbc.gridx = 0;
@@ -202,48 +200,25 @@ public class MainFrame extends JFrame {
                 "Результаты моделирования"
         ));
 
-        // Главная панель со строками графиков
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        String[] titles = {
+                "Эволюция координат X,Y,Z",
+                "Эволюция скоростей Vx,Vy,Vz",
+                "Траектория XY",
+                "Траектория XZ",
+                "Траектория YZ"
+        };
 
+        JPanel chartsPanel = new JPanel(new GridLayout(0, 2, 10, 10));
+        chartsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // --- графики ---
-        panelChart1 = createEmptyChartPanel("Эволюция координат X,Y,Z");
-        panelChart2 = createEmptyChartPanel("Эволюция скоростей Vx,Vy,Vz");
-        panelChart3 = createEmptyChartPanel("Траектория XY");
-        panelChart4 = createEmptyChartPanel("Траектория XZ");
-        panelChart5 = createEmptyChartPanel("Траектория YZ");
+        for (int i = 0; i < titles.length; i++) {
+            chartPanels[i] = createEmptyChartPanel(titles[i]);
+            chartPanels[i].setPreferredSize(new Dimension(500,500));
+            chartsPanel.add(chartPanels[i]);
+        }
 
-        // строка 1
-        mainPanel.add(createRow(panelChart1, panelChart2));
-
-        // строка 2
-        mainPanel.add(createRow(panelChart3, panelChart4));
-
-        // строка 3
-        mainPanel.add(createRow(panelChart5, new JPanel()));
-
-        // Scroll
-        JScrollPane scrollPane = new JScrollPane(mainPanel);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-
-        chartsContainer.add(scrollPane, BorderLayout.CENTER);
-
+        chartsContainer.add(new JScrollPane(chartsPanel), BorderLayout.CENTER);
         add(chartsContainer, BorderLayout.CENTER);
-    }
-
-    private JPanel createRow(JPanel left, JPanel right) {
-
-        JPanel row = new JPanel(new GridLayout(1,2,10,10));
-        row.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
-
-        left.setPreferredSize(new Dimension(500,500));
-        right.setPreferredSize(new Dimension(500,500));
-
-        row.add(left);
-        row.add(right);
-
-        return row;
     }
 
     //Создание пустой панели для графика с заголовком
@@ -262,6 +237,12 @@ public class MainFrame extends JFrame {
         return panel;
     }
 
+    private void updateChart(int index, JComponent chart) {
+        chartPanels[index].removeAll();
+        chartPanels[index].add(chart, BorderLayout.CENTER);
+        chartPanels[index].revalidate();
+        chartPanels[index].repaint();
+    }
 
     //Сброс полей ввода к значениям по умолчанию
     private void resetInputFields() {
@@ -315,50 +296,18 @@ public class MainFrame extends JFrame {
                 java.util.List<TVector> trajectory = integrator.trajectory;
                 java.util.List<Double> time = integrator.time;
 
-                panelChart1.removeAll();
-                panelChart1.add(ChartCreator.createPositionTimeChart(
-                        trajectory,
-                        time
-                ));
+                updateChart(0, ChartCreator.createPositionTimeChart(trajectory, time));
 
-                panelChart2.removeAll();
-                panelChart2.add(ChartCreator.createVelocityTimeChart(
-                        trajectory,
-                        time
-                ));
+                updateChart(1, ChartCreator.createVelocityTimeChart(trajectory, time));
 
-                panelChart3.removeAll();
-                panelChart3.add(ChartCreator.createPhaseChart(
-                        "X",
-                        "Y",
-                        trajectory,
-                        v -> v.x,
-                        v -> v.y
-                ));
+                updateChart(2, ChartCreator.createPhaseChart(
+                        "X","Y",trajectory,v -> v.x,v -> v.y));
 
-                panelChart4.removeAll();
-                panelChart4.add(ChartCreator.createPhaseChart(
-                        "X",
-                        "Z",
-                        trajectory,
-                        v -> v.x,
-                        v -> v.z
-                ));
+                updateChart(3, ChartCreator.createPhaseChart(
+                        "X","Z",trajectory,v -> v.x,v -> v.z));
 
-                panelChart5.removeAll();
-                panelChart5.add(ChartCreator.createPhaseChart(
-                        "Y",
-                        "Z",
-                        trajectory,
-                        v -> v.y,
-                        v -> v.z
-                ));
-
-                panelChart1.revalidate();
-                panelChart2.revalidate();
-                panelChart3.revalidate();
-                panelChart4.revalidate();
-                panelChart5.revalidate();
+                updateChart(4, ChartCreator.createPhaseChart(
+                        "Y","Z",trajectory,v -> v.y,v -> v.z));
 
                 TVector result = integrator.state;
 
