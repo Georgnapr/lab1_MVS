@@ -256,6 +256,10 @@ public class MainFrame extends JFrame {
         tfTk.setText("10000.0");
         tfH.setText("10.0");
         cbIntegrator.setSelectedIndex(0);
+        for (JPanel chartPanel : chartPanels) {
+            chartPanel.removeAll();
+            chartPanel.repaint();
+        }
 
     }
 
